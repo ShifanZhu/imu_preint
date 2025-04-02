@@ -207,7 +207,6 @@ private:
 
     // 预积分数据的时间长度
     double delta_time_;
-
 };
 
 

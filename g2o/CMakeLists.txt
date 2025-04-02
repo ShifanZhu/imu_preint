@@ -34,6 +34,9 @@ ${EIGEN3_INCLUDE_DIR}
 ${CHOLMOD_INCLUDE_DIR}
 )
 
+find_package(G2O REQUIRED)
+include_directories(${G2O_INCLUDE_DIRS})
+
 # 设置CMake库输出目录。
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
@@ -47,7 +50,8 @@ add_library(${PROJECT_NAME} SHARED
 # 链接库。 
 target_link_libraries(${PROJECT_NAME}
 ${EIGEN3_LIBS}
-${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+# ${PROJECT_SOURCE_DIR}/Thirdparty/g2o/lib/libg2o.so
+g2o_core g2o_stuff g2o_types_sba g2o_solver_csparse g2o_csparse_extension g2o_types_slam3d
 cholmod
 ${CHOLMOD_LIBRARIES}
 ${BLAS_LIBRARIES}

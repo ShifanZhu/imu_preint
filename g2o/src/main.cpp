@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 
     IMUPreintegrator IMUPreintegrator;
 
-    std::ofstream output("../../../../log/new_pre.txt");
+    std::ofstream output("../data/new_pre.txt");
 
     for(int i=0; i<20; ++i)
     {
@@ -78,6 +78,7 @@ void LoadEuRocIMUData(const std::string &strImuPath, std::vector<IMUData> &imu_d
         getline(fImus, s);
         if (!s.empty())
         {
+            // skip for lines that starts without number
             char c = s.at(0);
             if (c < '0' || c > '9')
                 continue;
@@ -97,11 +98,10 @@ void LoadEuRocIMUData(const std::string &strImuPath, std::vector<IMUData> &imu_d
                     ss.ignore();
             }
             // data[0]是时间戳。
-            data[0] *= 1e-9;
+            data[0] *= 1e-9; // to second
             IMUData imudata(data[1], data[2], data[3],
                                        data[4], data[5], data[6], data[0]);
             imu_datas.push_back(imudata);
-
         }
     }
 }

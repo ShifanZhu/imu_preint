@@ -22,10 +22,7 @@ IMUPreintegrator::IMUPreintegrator()
     cov_p_v_rot_.setZero();
 
     delta_time_ = 0.0;
-
 }
-
-
 
 IMUPreintegrator::IMUPreintegrator(const IMUPreintegrator &preintegrator) :
         delta_p_(preintegrator.delta_p_), delta_v_(preintegrator.delta_v_), delta_rot_(preintegrator.delta_rot_),
@@ -35,20 +32,14 @@ IMUPreintegrator::IMUPreintegrator(const IMUPreintegrator &preintegrator) :
         jacobian_v_bias_acc_(preintegrator.jacobian_v_bias_acc_),
         jacobian_rot_bias_gyr_(preintegrator.jacobian_rot_bias_gyr_),
         cov_p_v_rot_(preintegrator.cov_p_v_rot_), delta_time_(preintegrator.delta_time_)
-{
+{}
 
-}
-
-
-
-void IMUPreintegrator::Update(const Eigen::Vector3d &omega, const Eigen::Vector3d &acc, const double &delta_t)
-{
+void IMUPreintegrator::Update(const Eigen::Vector3d &omega, const Eigen::Vector3d &acc, const double &delta_t) {
     double dt2 = delta_t*delta_t;
 
     // 步骤1 计算IMU预积分旋转增量和Jacobian
     Eigen::Matrix3d dR = Sophus::SO3::exp(omega*delta_t).matrix();
     Eigen::Matrix3d Jr_R = Sophus::SO3::JacobianR(omega*delta_t);
-
 
     // 步骤2 计算IMU预积分观测方程噪声误差的不确定度方差
     // 参考文献1补充材料的公式A.7-A.9, 文中误差项顺序为RVP, 代码中为PVR
@@ -76,7 +67,6 @@ void IMUPreintegrator::Update(const Eigen::Vector3d &omega, const Eigen::Vector3
     Ca.block<3,3>(3,0) = delta_rot_ * delta_t;
     Ca.block<3,3>(0,0) = 0.5*delta_rot_*dt2;
 
-
     cov_p_v_rot_ = A * cov_p_v_rot_ * A.transpose() +
                    Bg * IMUData::gyr_meas_cov_ * Bg.transpose() +
                    Ca * IMUData::acc_meas_cov_ * Ca.transpose();
@@ -93,19 +83,12 @@ void IMUPreintegrator::Update(const Eigen::Vector3d &omega, const Eigen::Vector3
 
     jacobian_rot_bias_gyr_ = dR.transpose() * jacobian_rot_bias_gyr_ - Jr_R * delta_t;          // 在补充材料公式基础上进行递推
 
-
-
-
     // 步骤4 计算IMU预积分测量值
     delta_p_ += delta_v_*delta_t + 0.5 * delta_rot_ * acc *dt2;
     delta_v_ += delta_rot_ * acc *delta_t;
     delta_rot_ = NormalizeRotationM(delta_rot_ * dR);
     delta_time_ += delta_t;
-
-
 }
-
-
 
 void IMUPreintegrator::reset()
 {
